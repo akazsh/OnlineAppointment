@@ -5,26 +5,61 @@ pipeline {
     NODE_ENV = 'test'
   }
 
-  tools {
-    nodejs 'NodeJS 18'
-  }
-
   stages {
+    stage('Check Node.js') {
+      steps {
+        script {
+          if (isUnix()) {
+            sh 'node --version'
+            sh 'npm --version'
+            sh 'node -e "if (parseInt(process.versions.node, 10) < 18) process.exit(1)"'
+          } else {
+            bat 'node --version'
+            bat 'npm --version'
+            bat 'node -e "if (parseInt(process.versions.node, 10) < 18) process.exit(1)"'
+          }
+        }
+      }
+    }
+
     stage('Install dependencies') {
       steps {
-        sh 'npm ci --no-audit --no-fund'
+        script {
+          if (isUnix()) {
+            sh 'npm ci --no-audit --no-fund'
+          } else {
+            bat 'npm ci --no-audit --no-fund'
+          }
+        }
       }
     }
 
     stage('Validate application') {
       steps {
-        sh 'node --check server.js'
+        script {
+          if (isUnix()) {
+            sh 'node --check server.js'
+          } else {
+            bat 'node --check server.js'
+          }
+        }
       }
     }
 
     stage('Package app') {
       steps {
-        sh 'npm pack --silent'
+        script {
+          if (isUnix()) {
+            sh 'npm pack --silent'
+          } else {
+            bat 'npm pack --silent'
+          }
+        }
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: '*.tgz', fingerprint: true
+        }
       }
     }
   }

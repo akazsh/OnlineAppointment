@@ -22,3 +22,7 @@ Set a private, random `SESSION_SECRET` before exposing the app beyond your local
 - Node.js and Express
 - PostgreSQL (`pg`)
 - Browser-native HTML, CSS, and JavaScript
+
+## Jenkins build
+
+Create a Pipeline job configured to use this repository and select **Pipeline script from SCM**. The root-level `Jenkinsfile` installs locked dependencies, checks the server syntax, and archives the generated `.tgz` package. The Jenkins agent must have Node.js 18 or newer and npm available on `PATH`; no Jenkins NodeJS plugin is required. Both Windows and Unix agents are supported.
