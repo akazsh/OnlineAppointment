@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f2">
+  <meta name="description" content="Find your person, pick a time, and make space for what matters.">
+  <title>Goodspace | Appointments, made easy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="#explore" aria-label="Goodspace home"><span class="brand-mark">g.</span><span>goodspace</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <button class="nav-link active" id="explore-nav" type="button">Explore</button>
+      <button class="nav-link" id="appointments-nav" type="button">My appointments</button>
+    </nav>
+    <div class="top-actions" id="top-actions">
+      <button class="provider-link" id="provider-cta" type="button">List your practice</button>
+      <button class="button button-dark button-small" id="auth-trigger" type="button">Sign in</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="explore-view" id="explore-view">
+      <section class="intro-band">
+        <div class="intro-copy">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> GOOD THINGS START WITH A LITTLE SPACE</p>
+          <h1>Make time for <span>you.</span></h1>
+          <p class="intro-subtitle">Find trusted local people who help you feel more like yourself.</p>
+        </div>
+        <div class="intro-note"><span class="note-mark">01</span><span>Good care, on<br>your own terms.</span><span class="note-sun"></span></div>
+      </section>
+
+      <section class="discovery" aria-label="Find an appointment">
+        <div class="search-panel">
+          <label class="search-field"><span class="field-caption">I'M LOOKING FOR</span><input id="search-input" type="search" placeholder="A service, a name, a place..." autocomplete="off"><span class="search-glyph" aria-hidden="true"></span></label>
+          <label class="location-field"><span class="field-caption">AROUND</span><span class="location-value"><span class="pin-glyph" aria-hidden="true"></span><input id="location-input" type="search" placeholder="Any location" autocomplete="off"></span></label>
+          <button class="button button-coral search-button" id="search-button" type="button">Find a time <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="category-row" id="category-row" aria-label="Filter by service category">
+          <button class="category-chip selected" data-category="" type="button">Everything</button>
+          <button class="category-chip" data-category="Dental care" type="button">Dental care</button>
+          <button class="category-chip" data-category="Therapy" type="button">Therapy</button>
+          <button class="category-chip" data-category="Massage" type="button">Massage</button>
+          <button class="category-chip" data-category="Hair & beauty" type="button">Hair & beauty</button>
+          <button class="category-chip" data-category="Coaching" type="button">Coaching</button>
+          <button class="category-chip" data-category="Wellness" type="button">Wellness</button>
+        </div>
+      </section>
+
+      <section class="results-section" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div><p class="eyebrow muted-eyebrow">A GOOD PLACE TO BEGIN</p><h2 id="results-title">People worth your time<span class="heading-period">.</span></h2></div>
+          <span class="results-count" id="results-count"></span>
+        </div>
+        <div class="provider-grid" id="provider-grid" aria-live="polite"></div>
+        <div class="empty-state hidden" id="empty-state"><span class="empty-stamp">hmm.</span><h3>No matches just yet</h3><p>Try a different search, or clear your filters to see everyone.</p><button class="button button-outline" id="clear-search" type="button">Clear filters</button></div>
+      </section>
+      <section class="closing-band"><span class="closing-flower" aria-hidden="true">✳</span><p>Taking care of yourself is a pretty good place to start.</p><span class="closing-signature">MAKE A LITTLE ROOM</span></section>
+    </section>
+
+    <section class="appointments-view hidden" id="appointments-view">
+      <div class="dashboard-heading"><div><p class="eyebrow muted-eyebrow">YOUR GOODSPACE</p><h1 id="dashboard-title">Your appointments<span class="heading-period">.</span></h1></div><button class="button button-outline" id="back-to-explore" type="button">Explore providers</button></div>
+      <div class="dashboard-summary" id="dashboard-summary"></div>
+      <div class="appointment-list" id="appointment-list"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><a class="wordmark footer-mark" href="#explore"><span class="brand-mark">g.</span><span>goodspace</span></a><span>Make a little room for yourself.</span><span class="footer-year">A better kind of busy.</span></footer>
+
+  <dialog class="modal" id="provider-dialog" aria-labelledby="provider-dialog-title"><div class="modal-inner" id="provider-modal-content"></div></dialog>
+  <dialog class="modal auth-modal" id="auth-dialog" aria-labelledby="auth-title"><div class="modal-inner" id="auth-modal-content"></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
