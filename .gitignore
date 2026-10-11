@@ -1,3 +1,15 @@
 node_modules/
 .env
 npm-debug.log*
+# Environment secrets
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Dependencies and logs
+node_modules/
+npm-debug.log*
+
+# Local files
+.DS_Store

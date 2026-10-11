@@ -15,6 +15,7 @@ function escapeHtml(value = '') {
 async function api(url, options = {}) {
   const response = await fetch(url, {
     ...options,
+    credentials: 'same-origin',
     headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });

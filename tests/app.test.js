@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { validDate, slotTimes } = require('../server.js');
+const { validDate, slotTimes, sessionCookieSecure } = require('../server.js');
 
 test('validDate accepts valid ISO dates and rejects invalid ones', () => {
   assert.equal(validDate('2025-02-28'), true);
@@ -31,4 +31,11 @@ test('slotTimes only returns open business hours and avoids busy appointment slo
   assert.equal(available.includes('13:30'), true);
   assert.equal(available.includes('16:00'), true);
   assert.ok(Array.isArray(available));
+});
+
+test('session cookie security can be disabled for local HTTP while production remains secure by default', () => {
+  assert.equal(sessionCookieSecure('production', undefined), true);
+  assert.equal(sessionCookieSecure('production', 'false'), false);
+  assert.equal(sessionCookieSecure('development', 'true'), true);
+  assert.equal(sessionCookieSecure('development', undefined), false);
 });

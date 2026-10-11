@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: online-appointment-config
+data:
+  PORT: "3000"
+  NODE_ENV: "production"
+  PGHOST: "host.minikube.internal"
+  PGPORT: "5969"
+  PGDATABASE: "appointmentsystem"
+  SESSION_COOKIE_SECURE: "false"

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: online-appointment
+  labels:
+    app: online-appointment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: online-appointment
+  template:
+    metadata:
+      labels:
+        app: online-appointment
+    spec:
+      containers:
+        - name: online-appointment
+          image: online-appointment:1.0.0
+          imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: online-appointment-config
+          env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: online-appointment-secrets
+                  key: PGUSER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: online-appointment-secrets
+                  key: PGPASSWORD
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: online-appointment-secrets
+                  key: SESSION_SECRET
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

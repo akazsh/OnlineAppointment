@@ -21,12 +21,18 @@ const databaseOptions = process.env.DATABASE_URL
     };
 let pool = new Pool(databaseOptions);
 
+function sessionCookieSecure(nodeEnv, override) {
+  if (override === 'true') return true;
+  if (override === 'false') return false;
+  return nodeEnv === 'production';
+}
+
 app.use(express.json({ limit: '32kb' }));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'replace-this-session-secret-before-deployment',
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 7 * 24 * 60 * 60 * 1000 },
+  cookie: { httpOnly: true, sameSite: 'lax', secure: sessionCookieSecure(process.env.NODE_ENV, process.env.SESSION_COOKIE_SECURE), maxAge: 7 * 24 * 60 * 60 * 1000 },
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -345,6 +351,7 @@ module.exports = {
   requireUser,
   validDate,
   slotTimes,
+  sessionCookieSecure,
 };
 
 if (require.main === module) {
