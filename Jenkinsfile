@@ -61,69 +61,60 @@ pipeline {
     stage('Package app') {
       steps {
         script {
-          def packageVersion
-          def gitCommitShort
-          def buildIdentifier
-
           if (isUnix()) {
-            packageVersion = sh(script: 'node -p "require(\'./package.json\').version"', returnStdout: true).trim()
-            gitCommitShort = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-            buildIdentifier = "${packageVersion}-${gitCommitShort}"
-            env.BUILD_IDENTIFIER = buildIdentifier
+            def packageVersion = sh(
+              script: 'node -p "require(\'./package.json\').version"',
+              returnStdout: true
+            ).trim()
+
+            def gitCommitShort = sh(
+              script: 'git rev-parse --short HEAD',
+              returnStdout: true
+            ).trim()
+
+            env.BUILD_IDENTIFIER = "${packageVersion}-${gitCommitShort}"
             echo "Build identifier: ${env.BUILD_IDENTIFIER}"
+
             sh 'mkdir -p dist'
             sh 'npm pack --silent --pack-destination dist'
             sh "mv dist/*.tgz \"dist/appointment-hub-${env.BUILD_IDENTIFIER}.tgz\""
           } else {
-            packageVersion = bat(script: """
-              @echo off
-              for /f \"delims=\" %I in ('node -p \"require('./package.json').version\" 2^>nul') do @echo %I
-            """, returnStdout: true).trim()
-            gitCommitShort = bat(script: """
-              @echo off
-              for /f \"delims=\" %I in ('git rev-parse --short HEAD 2^>nul') do @echo %I
-            """, returnStdout: true).trim()
-            buildIdentifier = "${packageVersion}-${gitCommitShort}"
-            env.BUILD_IDENTIFIER = buildIdentifier
-            echo "Build identifier: ${env.BUILD_IDENTIFIER}"
             bat '''
               @echo off
-              setlocal enabledelayedexpansion
               if not exist "dist" mkdir "dist"
+              del /f /q "dist\\*.tgz" 2>nul
+            '''
 
-              for %%F in ("dist\\*.tgz") do del /q "%%~fF"
+            def packageVersion = powershell(
+              script: "(node -p \"require('./package.json').version\").Trim()",
+              returnStdout: true
+            ).trim()
 
-              npm pack --silent --pack-destination dist
-              if errorlevel 1 (
-                echo npm pack failed.
-                exit /b 1
-              )
+            def gitCommitShort = powershell(
+              script: "(git rev-parse --short HEAD).Trim()",
+              returnStdout: true
+            ).trim()
 
-              set "PKG="
-              for /f "delims=" %%F in ('dir /b /a-d "dist\\*.tgz" 2^>nul') do (
-                set "PKG=%%~fF"
-                goto rename_pkg
-              )
+            env.BUILD_IDENTIFIER = "${packageVersion}-${gitCommitShort}"
+            echo "Build identifier: ${env.BUILD_IDENTIFIER}"
 
-              echo No package found in dist after npm pack.
-              exit /b 1
+            bat '''
+              @echo off
+              call npm pack --silent --pack-destination dist
+              if errorlevel 1 exit /b 1
+            '''
 
-              :rename_pkg
-              if not defined PKG (
-                echo No package found in dist after npm pack.
-                exit /b 1
-              )
-              ren "!PKG!" "appointment-hub-%BUILD_IDENTIFIER%.tgz"
-              if errorlevel 1 (
-                echo Failed to rename package.
-                exit /b 1
-              )
-
-              dir /b /a-d "dist\\*.tgz" | findstr /i /c:"appointment-hub-%BUILD_IDENTIFIER%.tgz" >nul
-              if errorlevel 1 (
-                echo Renamed package not found in dist.
-                exit /b 1
-              )
+            powershell '''
+              $ErrorActionPreference = "Stop"
+              $files = @(Get-ChildItem -Path "dist" -Filter "*.tgz" -File)
+              if ($files.Count -ne 1) {
+                throw "Expected exactly one package in dist, found $($files.Count)"
+              }
+              $target = "appointment-hub-$env:BUILD_IDENTIFIER.tgz"
+              Rename-Item -LiteralPath $files[0].FullName -NewName $target
+              if (-not (Test-Path -LiteralPath "dist\$target")) {
+                throw "Versioned package was not created."
+              }
             '''
           }
         }
