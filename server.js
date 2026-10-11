@@ -339,16 +339,26 @@ app.use('/api', (error, req, res, next) => {
   res.status(500).json({ error: process.env.NODE_ENV === 'production' ? 'Something went wrong. Please try again.' : error.message });
 });
 
-initializeDatabase().then(() => {
-  app.listen(port, () => console.log(`Appointment Hub is running at http://localhost:${port}`));
-}).catch((error) => {
-  console.error('\nCould not connect to PostgreSQL or initialize the app database.');
-  console.error(`Configured database: ${process.env.PGDATABASE || 'appointmentsystem'} at ${process.env.PGHOST || 'localhost'}:${process.env.PGPORT || 5969}`);
-  if (/password|authentication|SASL/i.test(error.message)) {
-    console.error('PostgreSQL rejected the configured credentials. Set PGUSER and PGPASSWORD in .env, then run run.bat again.');
-  } else {
-    console.error('Set PGUSER, PGPASSWORD, PGDATABASE, or DATABASE_URL in .env and run run.bat again.');
-  }
-  console.error(error.message);
-  process.exit(1);
-});
+module.exports = {
+  app,
+  cleanText,
+  requireUser,
+  validDate,
+  slotTimes,
+};
+
+if (require.main === module) {
+  initializeDatabase().then(() => {
+    app.listen(port, () => console.log(`Appointment Hub is running at http://localhost:${port}`));
+  }).catch((error) => {
+    console.error('\nCould not connect to PostgreSQL or initialize the app database.');
+    console.error(`Configured database: ${process.env.PGDATABASE || 'appointmentsystem'} at ${process.env.PGHOST || 'localhost'}:${process.env.PGPORT || 5969}`);
+    if (/password|authentication|SASL/i.test(error.message)) {
+      console.error('PostgreSQL rejected the configured credentials. Set PGUSER and PGPASSWORD in .env, then run run.bat again.');
+    } else {
+      console.error('Set PGUSER, PGPASSWORD, PGDATABASE, or DATABASE_URL in .env and run run.bat again.');
+    }
+    console.error(error.message);
+    process.exit(1);
+  });
+}
