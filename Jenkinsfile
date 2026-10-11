@@ -34,6 +34,18 @@ pipeline {
       }
     }
 
+    stage('Unit Tests') {
+      steps {
+        script {
+          if (isUnix()) {
+            sh 'npm test'
+          } else {
+            bat 'npm test'
+          }
+        }
+      }
+    }
+
     stage('Validate application') {
       steps {
         script {
@@ -49,16 +61,43 @@ pipeline {
     stage('Package app') {
       steps {
         script {
+          def packageVersion
+          def gitCommitShort
+          def buildIdentifier
+
           if (isUnix()) {
-            sh 'npm pack --silent'
+            packageVersion = sh(script: 'node -p "require(\'./package.json\').version"', returnStdout: true).trim()
+            gitCommitShort = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            buildIdentifier = "${packageVersion}-${gitCommitShort}"
+            env.BUILD_IDENTIFIER = buildIdentifier
+            echo "Build identifier: ${env.BUILD_IDENTIFIER}"
+            sh 'mkdir -p dist'
+            sh 'npm pack --silent --pack-destination dist'
+            sh "mv dist/*.tgz \"dist/appointment-hub-${env.BUILD_IDENTIFIER}.tgz\""
           } else {
-            bat 'npm pack --silent'
+            packageVersion = bat(script: "node -p \"require('./package.json').version\"", returnStdout: true).trim()
+            gitCommitShort = bat(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            buildIdentifier = "${packageVersion}-${gitCommitShort}"
+            env.BUILD_IDENTIFIER = buildIdentifier
+            echo "Build identifier: ${env.BUILD_IDENTIFIER}"
+            bat '''
+              setlocal enabledelayedexpansion
+              if not exist "dist" mkdir "dist"
+              npm pack --silent --pack-destination dist
+              for /f "delims=" %%F in ('dir /b /a-d "dist\\*.tgz" 2^>nul') do (
+                set "PKG=%%~fF"
+                ren "!PKG!" "appointment-hub-%BUILD_IDENTIFIER%.tgz"
+                exit /b 0
+              )
+              echo No package found in dist after npm pack.
+              exit /b 1
+            '''
           }
         }
       }
       post {
         success {
-          archiveArtifacts artifacts: '*.tgz', fingerprint: true
+          archiveArtifacts artifacts: 'dist/*.tgz', fingerprint: true
         }
       }
     }
