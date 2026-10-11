@@ -111,8 +111,9 @@ pipeline {
                 throw "Expected exactly one package in dist, found $($files.Count)"
               }
               $target = "appointment-hub-$env:BUILD_IDENTIFIER.tgz"
+              $destination = Join-Path -Path $files[0].DirectoryName -ChildPath $target
               Rename-Item -LiteralPath $files[0].FullName -NewName $target
-              if (-not (Test-Path -LiteralPath "dist\$target")) {
+              if (-not (Test-Path -LiteralPath $destination -PathType Leaf)) {
                 throw "Versioned package was not created."
               }
             '''
